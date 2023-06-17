@@ -1,8 +1,8 @@
 python generateUniqueProjects.py
 mkdir process
-mv genMethods.py process
-mv run.sh process
-mv UniqueProjects.csv process
+move  genMethods.py process
+move  run.sh process
+move  UniqueProjects.csv process
 cd process
-bash run.sh
+run.bat
 python genMethods.py
