@@ -58,10 +58,14 @@ def getFilesList(csv_data):
         modulePath = row[2]
         if modulePath.startswith("."):
             modulePath = modulePath[1:]
+        if modulePath.startswith("/"):
+            modulePath = modulePath[1:]
         projectName = getProjName(gitURL)
-        absolutePath =  os.path.join(projectName,modulePath,"src","test","java")
+        if modulePath == "":
+            absolutePath = projectName+"/src/test/java"
+        else:
+            absolutePath = projectName+"/"+modulePath+"/src/test/java"
         fileList = list_java_files(absolutePath)
-        print(str(absolutePath))
         for file in fileList:
             newCSV.append([projectName,gitURL,sha,modulePath,file])
     return newCSV
