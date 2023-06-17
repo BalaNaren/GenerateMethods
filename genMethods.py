@@ -38,8 +38,7 @@ def getMethods(file_name):
         for path, node in tree.filter(javalang.tree.MethodDeclaration):
             if any(isinstance(annotation, javalang.tree.Annotation) and annotation.name == 'Test' for annotation in node.annotations):
                 methodNames.append(node.name)
-    except Exception as e: 
-        print(e)
+    except Exception as e:
         message = "Failed to read "+ file_name
         print(message)
         appendFile("log.txt",message)
@@ -129,14 +128,10 @@ def generateMethodFiles(csv_data):
                 writeFile(outputFilePath,methodCode)
                 newRow=[projectName,modulePath,filePath,method,testAbsolutePath]
                 newCSV.append(newRow)
-            except Exception as e: 
-                print(e)
+            except Exception as e:
                 message = "failed to generate method file for "+ method+" at "+filePath
                 print(message)
                 appendFile("log.txt",message)
-            
-    for row in newCSV:
-        print(str(row))
     return newCSV
     
 def generateFileListCSV(csv_data):
