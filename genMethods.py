@@ -56,12 +56,12 @@ def getFilesList(csv_data):
         gitURL = row[0]
         sha = row[1]
         modulePath = row[2]
-        modulePath = modulePath.replace("/","\\")
         if modulePath.startswith("."):
             modulePath = modulePath[1:]
         projectName = getProjName(gitURL)
-        absolutePath = projectName + modulePath + "\\" + "src\\test\\java"
+        absolutePath =  os.path.join(projectName,modulePath,"src","test","java")
         fileList = list_java_files(absolutePath)
+        print(str(absolutePath))
         for file in fileList:
             newCSV.append([projectName,gitURL,sha,modulePath,file])
     return newCSV
@@ -99,7 +99,7 @@ def appendFile(fileName,content):
 
 def generateMethodListCSV(csv_data):
     csv_data = [["project_name","git","sha","modulePath","filePath","testMethods"]] + csv_data
-    fileName = "output\\methodList.csv"
+    fileName = os.path.join("output","methodList.csv")
     createCSV(fileName,csv_data)
 
 def mkdir(path):
@@ -113,18 +113,18 @@ def generateMethodFiles(csv_data):
         filePath = row[4]
         projectName = row[0]
         modulePath = row[3]
-        outputDir = "output" + "\\" + projectName + "\\" + modulePath
+        outputDir = os.path.join("output",projectName,modulePath)
         mkdir(outputDir)
         for method in methods:
             print("generating method file for "+ method+" at "+filePath)
             try:
                 methodCode = extract_method_srcml(filePath,method)
-                testAbsolutePath = filePath.replace("src\\test\\java\\","")
+                testAbsolutePath = filePath.replace("src/test/java/","")
                 testAbsolutePath = testAbsolutePath.replace(".java","")
-                testAbsolutePath = testAbsolutePath.replace("\\","_",1)
-                testAbsolutePath = testAbsolutePath.replace("\\",".")
+                testAbsolutePath = testAbsolutePath.replace("/","_",1)
+                testAbsolutePath = testAbsolutePath.replace("/",".")
                 testAbsolutePath = testAbsolutePath + "#" + method + ".txt"
-                outputFilePath = outputDir + "\\" + testAbsolutePath
+                outputFilePath = os.path.join(outputDir,testAbsolutePath)
                 writeFile(outputFilePath,methodCode)
                 newRow=[projectName,modulePath,filePath,method,testAbsolutePath]
                 newCSV.append(newRow)
@@ -136,7 +136,7 @@ def generateMethodFiles(csv_data):
     
 def generateFileListCSV(csv_data):
     csv_data = [["project_name","modulePath","filePath","method","methodFileName"]] + csv_data
-    fileName = "output\\fileList.csv"
+    fileName = os.path.join("output","fileList.csv")
     createCSV(fileName,csv_data)
 
 if __name__ == "__main__":
