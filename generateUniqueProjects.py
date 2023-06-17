@@ -18,8 +18,8 @@ for row in df_uniqueProj.iterrows():
     gitURL = str(row[0])
     sha = str(row[1])
     projName = getProjName(gitURL)
-    write2File("run.sh","git clone "+gitURL);
-    write2File("run.sh","cd "+projName);
-    write2File("run.sh","git checkout "+sha);
-    write2File("run.sh","cd ..");
+    write2File("run.bat","git clone "+gitURL);
+    write2File("run.bat","cd "+projName);
+    write2File("run.bat","git checkout "+sha);
+    write2File("run.bat","cd ..");
 df_unique.to_csv('UniqueProjects.csv', index=False, header=False)
