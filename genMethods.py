@@ -17,10 +17,11 @@ def extract_method_srcml(file_path, method_name):
         srcml_output = file.read()
     tree = ET.fromstring(srcml_output)
     namespace = {'src': 'http://www.srcML.org/srcML/src'}
-    method_element = tree.xpath(f'//src:function[src:name="{method_name}"]', namespaces=namespace)[0]
+    method_element = tree.xpath(f'//src:method[src:name="{method_name}"]', namespaces=namespace)[0]
     code_block = ET.tostring(method_element, encoding='unicode', with_tail=False).strip()
     code_block = removeSrcmlTags(code_block)    
     return code_block
+
 
 def readCSV(input_file):
     with open(input_file, 'r') as csvfile:
@@ -36,7 +37,7 @@ def getMethods(file_name):
             java_code = file.read()
         tree = javalang.parse.parse(java_code)
         for path, node in tree.filter(javalang.tree.MethodDeclaration):
-            if any(isinstance(annotation, javalang.tree.Annotation) and annotation.name == 'Test' for annotation in node.annotations):
+            if any(isinstance(annotation, javalang.tree.Annotation) and annotation.name == 'Test' for annotation in node.annotations) and 'abstract' not in node.modifiers:
                 methodNames.append(node.name)
     except Exception as e:
         message = "Failed to read "+ file_name
