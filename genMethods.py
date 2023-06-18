@@ -17,11 +17,10 @@ def extract_method_srcml(file_path, method_name):
         srcml_output = file.read()
     tree = ET.fromstring(srcml_output)
     namespace = {'src': 'http://www.srcML.org/srcML/src'}
-    method_element = tree.xpath(f'//src:method[src:name="{method_name}"]', namespaces=namespace)[0]
+    method_element = tree.xpath(f'//src:function[src:name="{method_name}"]', namespaces=namespace)[0]
     code_block = ET.tostring(method_element, encoding='unicode', with_tail=False).strip()
     code_block = removeSrcmlTags(code_block)    
     return code_block
-
 
 def readCSV(input_file):
     with open(input_file, 'r') as csvfile:
