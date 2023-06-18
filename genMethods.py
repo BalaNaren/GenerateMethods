@@ -32,17 +32,16 @@ def getMethods(file_name):
     methodNames = []
     try:
         print("Reading file: "+file_name)
-        with open(file_name, "r", encoding='utf-8') as file:
+        with open(file_name, "r", encoding='utf-8', errors='ignore') as file:
             java_code = file.read()
         tree = javalang.parse.parse(java_code)
         for path, node in tree.filter(javalang.tree.MethodDeclaration):
             if any(isinstance(annotation, javalang.tree.Annotation) and annotation.name == 'Test' for annotation in node.annotations) and 'abstract' not in node.modifiers:
                 methodNames.append(node.name)
     except Exception as e:
-        message = "Failed to read "+ file_name
+        message = "Failed to read "+ file_name +"\n"+str(e)
         print(message)
-        appendFile("log.txt",message)
-
+        appendFile("output/log.txt",message)
     return methodNames
 
 def list_java_files(directory):
@@ -133,9 +132,9 @@ def generateMethodFiles(csv_data):
                 newRow=[projectName,modulePath,filePath,method,testAbsolutePath]
                 newCSV.append(newRow)
             except Exception as e:
-                message = "failed to generate method file for "+ method+" at "+filePath
+                message = "failed to generate method file for "+ method+" at "+filePath +"\n"+str(e)
                 print(message)
-                appendFile("log.txt",message)
+                appendFile("output/log.txt",message)
     return newCSV
     
 def generateFileListCSV(csv_data):
