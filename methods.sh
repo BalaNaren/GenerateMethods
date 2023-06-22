@@ -1,8 +1,9 @@
 python3 generateUniqueProjects.py
 mkdir process
-mv  genMethods.py process
-mv  run.sh process
-mv  UniqueProjects.csv process
+cp  genMethods.py process
+cp  run.sh process
+cp  UniqueProjects.csv process
+cp all-polluter-cleaner-info-combined-filtered-fp.csv process
 cd process
 bash run.sh
 python3 genMethods.py
