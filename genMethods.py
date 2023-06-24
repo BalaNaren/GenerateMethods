@@ -149,21 +149,28 @@ def generateMethodFiles(csv_data):
         methods = row[5].split(":")
         filePath = row[4]
         projectName = row[0]
+        git=row[1]
+        sha=row[2]
         modulePath = row[3]
         outputDir = os.path.join("output",projectName,modulePath)
-        mkdir(outputDir)
+        #mkdir(outputDir)
         for method in methods:
             print("generating method file for "+ method+" at "+filePath)
             try:
                 methodCode = extract_method_srcml_no_inheritance(filePath,method)
+                methodCode = "\"" + methodCode + "\""
                 testAbsolutePath = filePath.replace("src/test/java/","")
                 testAbsolutePath = testAbsolutePath.replace(".java","")
-                testAbsolutePath = testAbsolutePath.replace("/","_",1)
+                #testAbsolutePath = testAbsolutePath.replace("/","_",1)
+                testAbsolutePath = testAbsolutePath + "." + method #+ ".txt"
+                if modulePath != "":
+                    testAbsolutePath = testAbsolutePath.replace(projectName+"/"+modulePath+"/","")
+                else:
+                    testAbsolutePath = testAbsolutePath.replace(projectName+"/","")
                 testAbsolutePath = testAbsolutePath.replace("/",".")
-                testAbsolutePath = testAbsolutePath + "#" + method + ".txt"
-                outputFilePath = os.path.join(outputDir,testAbsolutePath)
-                writeFile(outputFilePath,methodCode)
-                newRow=[projectName,modulePath,filePath,method,testAbsolutePath]
+                #outputFilePath = os.path.join(outputDir,testAbsolutePath)
+                #writeFile(outputFilePath,methodCode)
+                newRow=[projectName,git,sha,modulePath,filePath,method,testAbsolutePath,methodCode]
                 newCSV.append(newRow)
             except Exception as e:
                 message = "failed to generate method file for "+ method+" at "+filePath +"\n"+str(e)
@@ -172,7 +179,7 @@ def generateMethodFiles(csv_data):
     return newCSV
     
 def generateFileListCSV(csv_data):
-    csv_data = [["project_name","modulePath","filePath","method","methodFileName"]] + csv_data
+    csv_data = [["project_name","gitURL","sha","modulePath","filePath","methodName","methodAbsolutePath","methodCode"]] + csv_data
     fileName = os.path.join("output","fileList.csv")
     createCSV(fileName,csv_data)
 
@@ -285,22 +292,61 @@ def generateMethodCodes4OrgCsv(fileName):
             appendFile("output/failedOrgCSV.csv",",".join(row))
     return data
 
-def generateProcessedOrgCsv(csv_data):
+def generateProcessedOrgCsv(csv_data, fileName="processedOrgCsv.csv"):
     csv_data = [["gitURL","sha","module","victim","polluter","cleaner","type","victim_code","polluter_code","cleaner_code"]] + csv_data
-    fileName = os.path.join("output","processedOrgCsv.csv")
+    fileName = os.path.join("output",fileName)
     createCSV(fileName,csv_data)
 
-if __name__ == "__main__":
-    mkdir("output")
+def main():
     csv_data = readCSV("UniqueProjects.csv")
     filesList = getFilesList(csv_data)
     methodsList = getMethodsList(filesList)
-    methodList4RandOrder= getMethodList4RandOrder(methodsList)
-    randomOrder = generateRandomOrder(methodList4RandOrder)
-    writeRandomOrders(randomOrder)    
-    generateMethodListCSV(methodsList)
+    #methodList4RandOrder= getMethodList4RandOrder(methodsList)
+    #randomOrder = generateRandomOrder(methodList4RandOrder)
+    #writeRandomOrders(randomOrder)    
+    #generateMethodListCSV(methodsList)
     fileNamesList=generateMethodFiles(methodsList)
     generateFileListCSV(fileNamesList)
-    processedOrgCsv = generateMethodCodes4OrgCsv("all-polluter-cleaner-info-combined-filtered-fp.csv")
+    #processedOrgCsv = generateMethodCodes4OrgCsv("all-polluter-cleaner-info-combined-filtered-fp.csv")
     #processedOrgCsv = generateMethodCodes4OrgCsv("failedOrgCSV.csv")
-    generateProcessedOrgCsv(processedOrgCsv)
+    #generateProcessedOrgCsv(processedOrgCsv)
+    #seperate("processedOrgCsv_P7.csv")
+
+def generateBCSV(csv_data,fileName="brittle_data.csv"):
+    csv_data = [["gitURL","sha","module","brittle","state-setter","NA","type","brittle_code","state-setter_code","NA"]] + csv_data
+    fileName = os.path.join("output",fileName)
+    createCSV(fileName,csv_data)
+
+def addQuotes(s):
+    if not s.startswith("\""):
+        s="\""+s
+    if not s.endswith("\""):
+        s=s+"\""
+    return s
+
+def seperate(fileName):
+    csv_data=readCSV(fileName)
+    csv_data.pop(0)
+    vCSV=[]
+    bCSV=[]
+    i=1
+    for row in csv_data:
+        print("Processing row: "+str(i))
+        newR = [r for r in row ]
+        type = newR[6]
+        newR[7]=addQuotes(newR[7])
+        newR[8]=addQuotes(newR[8])
+        newR[9]=addQuotes(newR[9])
+        if type == "victim":
+            vCSV.append(newR)
+        elif type == "brittle":
+            bCSV.append(newR)
+        else:
+            print("Failed row: "+str(i)+"->"+",".join(newR))
+        i=i+1
+    generateProcessedOrgCsv(vCSV,"victim_data.csv")
+    generateBCSV(bCSV)
+
+if __name__ == "__main__":
+    mkdir("output")
+    main()
