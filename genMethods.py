@@ -108,11 +108,30 @@ def getProjName(url):
     project_name = parts[-1].split('.')[0]
     return project_name
 
+def getMethodsStartWithTest(file_name):
+    methodNames = []
+    try:
+        print("Reading file: "+file_name)
+        with open(file_name, "r", encoding='utf-8', errors='ignore') as file:
+            java_code = file.read()
+        tree = javalang.parse.parse(java_code)
+        for path, node in tree.filter(javalang.tree.MethodDeclaration):
+            if node.name.startswith("test") and 'abstract' not in node.modifiers:
+                methodNames.append(node.name)
+    except Exception as e:
+        message = "Failed to read "+ file_name +"\n"+str(e)
+        print(message)
+        appendFile("output/log.txt",message)
+    return methodNames
+
 def getMethodsList(csv_data):
     newCSV = []
     for row in csv_data:
         filePath = row[4]
-        methods = getMethods(filePath)
+        if row[0]=="Struts":
+            methods = getMethodsStartWithTest(filePath)
+        else:
+            methods = getMethods(filePath)
         if len(methods)!=0:
             methods = ":".join(methods)
             newRow = list(row)
